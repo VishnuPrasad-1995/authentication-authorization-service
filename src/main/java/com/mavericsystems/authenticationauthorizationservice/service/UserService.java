@@ -26,4 +26,12 @@ public class UserService implements UserDetailsService {
     }
 
 
+    public boolean emailIsPresent(String email){
+      if(authorisationRepo.findByEmail(email)!=null){
+          return true;
+      }
+      return false;
+    }
+
+
 }
