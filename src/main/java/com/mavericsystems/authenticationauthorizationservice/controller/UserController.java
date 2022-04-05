@@ -1,30 +1,29 @@
 package com.mavericsystems.authenticationauthorizationservice.controller;
 
-
 import com.mavericsystems.authenticationauthorizationservice.dto.LoginRequest;
 import com.mavericsystems.authenticationauthorizationservice.dto.UserDto;
 import com.mavericsystems.authenticationauthorizationservice.dto.UserWithOutPassword;
-import com.mavericsystems.authenticationauthorizationservice.exception.CustomFeignException;
+import com.mavericsystems.authenticationauthorizationservice.exception.*;
 import com.mavericsystems.authenticationauthorizationservice.feign.UserFeign;
 import com.mavericsystems.authenticationauthorizationservice.model.JWTRequest;
 import com.mavericsystems.authenticationauthorizationservice.model.JWTResponse;
 import com.mavericsystems.authenticationauthorizationservice.repo.AuthorisationRepo;
 import com.mavericsystems.authenticationauthorizationservice.service.UserService;
 import com.mavericsystems.authenticationauthorizationservice.utility.JWTUtility;
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 
-import static com.mavericsystems.authenticationauthorizationservice.constant.SecurityConstant.FEIGNEXCEPTON;
+import static com.mavericsystems.authenticationauthorizationservice.constant.SecurityConstant.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -50,6 +49,9 @@ public class UserController {
         try {
             final UserDetails userDetails = userService.loadUserByUsername(loginRequest.getEmail());
             final String token = jwtUtility.generateToken(userDetails);
+            if(!(userDetails.getPassword().equals(loginRequest.getPassword()))){
+                throw new CredentialIncorrectException(CREDENTIALINCORRECT);
+            }
             return ResponseEntity.status(HttpStatus.OK).body(new JWTResponse(token, userFeign.getUserDetailsByEmail(loginRequest.getEmail())));
         }
         catch (feign.FeignException e){
@@ -58,11 +60,20 @@ public class UserController {
         catch (com.netflix.hystrix.exception.HystrixRuntimeException e){
             throw new CustomFeignException(FEIGNEXCEPTON);
         }
+        catch (CredentialIncorrectException e){
+            throw new CredentialIncorrectException(CREDENTIALINCORRECT);
+        }
+        catch (Exception e){
+            throw new EmailNotFoundException(EMAILNOTFOUND);
+        }
     }
     @PostMapping("/signup")
-    public ResponseEntity<JWTResponse> signup(@RequestBody UserDto userDto) throws Exception {
+    public ResponseEntity<JWTResponse> signup(@Valid @RequestBody UserDto userDto) throws Exception {
         try {
             JWTRequest jwtRequest = new JWTRequest();
+            if(userService.emailIsPresent(userDto.getEmail())){
+                throw new EmailAlreadyExistException(EMAILALREADYEXIST);
+            }
             jwtRequest.setEmail(userDto.getEmail());
             jwtRequest.setPassword(userDto.getPassword());
             UserWithOutPassword userWithOutPassword = userFeign.createUser(userDto);
@@ -77,5 +88,6 @@ public class UserController {
         catch (com.netflix.hystrix.exception.HystrixRuntimeException e){
             throw new CustomFeignException(FEIGNEXCEPTON);
         }
+
     }
 }
