@@ -26,24 +26,8 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
-    @ExceptionHandler(EmailNotFoundException.class)
-    ResponseEntity<ApiError> emailNotFoundHandler(Exception exception, ServletWebRequest request) {
-        ApiError apiError = new ApiError();
-        apiError.setMessage(exception.getLocalizedMessage());
-        apiError.setCode(HttpStatus.BAD_REQUEST.toString());
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(CredentialIncorrectException.class)
-    ResponseEntity<ApiError> credentialIncorrectHandler(Exception exception, ServletWebRequest request) {
-        ApiError apiError = new ApiError();
-        apiError.setMessage(exception.getLocalizedMessage());
-        apiError.setCode(HttpStatus.BAD_REQUEST.toString());
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(EmailAlreadyExistException.class)
-    ResponseEntity<ApiError> emailAlreadyExistHandler(Exception exception, ServletWebRequest request) {
+    @ExceptionHandler({EmailNotFoundException.class,CredentialIncorrectException.class,EmailAlreadyExistException.class})
+    ResponseEntity<ApiError> emailAndCredentialExceptionHandler(Exception exception, ServletWebRequest request) {
         ApiError apiError = new ApiError();
         apiError.setMessage(exception.getLocalizedMessage());
         apiError.setCode(HttpStatus.BAD_REQUEST.toString());

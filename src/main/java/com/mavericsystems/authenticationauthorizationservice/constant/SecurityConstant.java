@@ -7,8 +7,8 @@ public final class SecurityConstant {
     }
 
 
-    public static final String FEIGNEXCEPTON = "Feign call connection issue";
-    public static final String EMAILNOTFOUND = "Email not found";
-    public static final String CREDENTIALINCORRECT = "Please check your credentials";
-    public static final String EMAILALREADYEXIST = "Email Already exist";
+    public static final String FEIGN_EXCEPTION = "User service is not available";
+    public static final String EMAIL_NOT_FOUND = "Email not found";
+    public static final String CREDENTIAL_INCORRECT = "Please check your credentials";
+    public static final String EMAIL_ALREADY_EXIST = "Email Already exist";
 }
