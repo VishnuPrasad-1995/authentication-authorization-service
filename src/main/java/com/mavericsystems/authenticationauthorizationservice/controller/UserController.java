@@ -35,14 +35,17 @@ public class UserController {
     @Autowired
     private JWTUtility jwtUtility;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    UserFeign userFeign;
+    private final UserFeign userFeign;
 
     @Autowired
     AuthorisationRepo authorisationRepo;
+
+    public UserController(UserService userService, UserFeign userFeign) {
+        this.userService = userService;
+        this.userFeign = userFeign;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<JWTResponse> login(@RequestBody LoginRequest loginRequest) {
