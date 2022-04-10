@@ -1,7 +1,5 @@
 package com.mavericsystems.authenticationauthorizationservice.service;
 
-import com.mavericsystems.authenticationauthorizationservice.dto.UserDto;
-import com.mavericsystems.authenticationauthorizationservice.feign.UserFeign;
 import com.mavericsystems.authenticationauthorizationservice.model.JWTRequest;
 import com.mavericsystems.authenticationauthorizationservice.repo.AuthorisationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,11 @@ public class UserService implements UserDetailsService {
         JWTRequest jwtRequest = authorisationRepo.findByEmail(email);
 
         return new User(jwtRequest.getEmail(), jwtRequest.getPassword(), new ArrayList<>());
+    }
+
+
+    public boolean emailIsPresent(String email){
+        return authorisationRepo.findByEmail(email) != null;
     }
 
 
